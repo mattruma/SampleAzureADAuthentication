@@ -4,6 +4,8 @@ This is a sample application that demonstrates how to leverage Active Directory 
 
 There are two applications, one that leverages `AzureAd` as the default authentication scheme, and the other that leverages `OpenIdConnect`.
 
+You will need to update the `appsettings.json` file, or add an `appsettings.Development.json` that includes settings for your specific instance of Azure AD.
+
 ## Setup
 
 Register your application with Azure Active Directory.
