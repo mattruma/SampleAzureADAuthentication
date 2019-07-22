@@ -8,11 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.ComponentModel.Design.Serialization;
+using Microsoft.Graph;
+using Microsoft.Graph.Auth;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using SampleAzureADAuthenticationWithOpenIdConnect.Helpers;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Mime;
+using System.Net.Http;
+using System.Net.WebSockets;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SampleAzureADAuthenticationWithOpenIdConnect
@@ -26,12 +31,10 @@ namespace SampleAzureADAuthenticationWithOpenIdConnect
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(options =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
@@ -48,20 +51,56 @@ namespace SampleAzureADAuthenticationWithOpenIdConnect
                     Configuration.Bind("OpenIdConnect", options);
                     options.Events = new OpenIdConnectEvents
                     {
-                        OnAuthorizationCodeReceived = ctx =>
+                        OnAuthorizationCodeReceived = async ctx =>
                             {
                                 if (ctx.Principal.Identity is ClaimsIdentity identity)
                                 {
-                                    var claims =
-                                        ctx.Principal.Claims.Where(x => x.Type == "groups").ToList();
-
-                                    foreach (var claim in claims)
+                                    if (ctx.Principal.Claims.Any(x => x.Type == "groups"))
                                     {
-                                        identity.AddClaim(new Claim(ClaimTypes.Role, claim.Value));
+                                        var claims =
+                                            ctx.Principal.Claims.Where(x => x.Type == "groups").ToList();
+
+                                        foreach (var claim in claims)
+                                        {
+                                            identity.AddClaim(new Claim(ClaimTypes.Role, claim.Value));
+                                        }
+                                    }
+                                    else if (ctx.Principal.Claims.Any(x => x.Type == "_claim_names"))
+                                    {
+                                        var authenticationContext =
+                                            new AuthenticationContext(ctx.Options.Authority);
+                                        var clientCredentials =
+                                            new ClientCredential(ctx.Options.ClientId, ctx.Options.ClientSecret);
+
+                                        var result =
+                                            await authenticationContext.AcquireTokenAsync("https://graph.microsoft.com", clientCredentials);
+
+                                        using (var httpClient = new HttpClient())
+                                        {
+                                            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {result.AccessToken}");
+
+                                            var tenantId =
+                                                ctx.Principal.Claims.Single(x => x.Type == "http://schemas.microsoft.com/identity/claims/tenantid").Value;
+                                            var userId =
+                                                ctx.Principal.Claims.Single(x => x.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+
+                                            var httpResponse =
+                                                await httpClient.PostAsJsonAsync(
+                                                    $"https://graph.microsoft.com/v1.0/{tenantId}/users/{userId}/getMemberObjects",
+                                                    new { SecurityEnabledOnly = false });
+
+                                            httpResponse.EnsureSuccessStatusCode();
+
+                                            var jsonResult =
+                                                await httpResponse.Content.ReadAsAsync<dynamic>();
+
+                                            foreach (var value in jsonResult.value)
+                                            {
+                                                identity.AddClaim(new Claim(ClaimTypes.Role, value.ToString()));
+                                            }
+                                        }
                                     }
                                 }
-
-                                return Task.CompletedTask;
                             }
                     };
                 });
@@ -76,7 +115,6 @@ namespace SampleAzureADAuthenticationWithOpenIdConnect
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -86,7 +124,6 @@ namespace SampleAzureADAuthenticationWithOpenIdConnect
             else
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
