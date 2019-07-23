@@ -8,17 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Graph;
-using Microsoft.Graph.Auth;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using SampleAzureADAuthenticationWithOpenIdConnect.Helpers;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.WebSockets;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SampleAzureADAuthenticationWithOpenIdConnect
 {
