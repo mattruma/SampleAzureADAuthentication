@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleAzureADBlazorApp", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAzureADAuthenticationWithOpenIdConnectAndStandardFramework", "SampleAzureADAuthenticationWithOpenIdConnectAndStandardFramework\SampleAzureADAuthenticationWithOpenIdConnectAndStandardFramework.csproj", "{041981FE-8348-4E7E-8393-2F5EC483EACD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAzureADAuthenticationWithAppEnabledAuthentication", "SampleAzureADAuthenticationWithAppEnabledAuthentication\SampleAzureADAuthenticationWithAppEnabledAuthentication.csproj", "{7B8F465E-26EE-493C-92E7-5227D5182D4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{041981FE-8348-4E7E-8393-2F5EC483EACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{041981FE-8348-4E7E-8393-2F5EC483EACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{041981FE-8348-4E7E-8393-2F5EC483EACD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B8F465E-26EE-493C-92E7-5227D5182D4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B8F465E-26EE-493C-92E7-5227D5182D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B8F465E-26EE-493C-92E7-5227D5182D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B8F465E-26EE-493C-92E7-5227D5182D4F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
