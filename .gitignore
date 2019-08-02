@@ -6,6 +6,8 @@ local.settings.json
 
 # Application settings file
 appsettings.*.json
+Web.config
+Web.*.config
 
 # User-specific files
 *.suo
