@@ -8,7 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Graph;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Newtonsoft.Json.Linq;
+using SampleAzureADAuthenticationWithOpenIdConnect.Helpers;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -86,10 +90,14 @@ namespace SampleAzureADAuthenticationWithOpenIdConnect
 
                                             var jsonResult =
                                                 await httpResponse.Content.ReadAsAsync<dynamic>();
+                                            var securityGroups =
+                                                ((JArray)jsonResult.value).ToObject<List<string>>();
+                                            var availableSecurityGroups =
+                                                 new[] { Roles.ROLE_GROUP1, Roles.ROLE_GROUP2, Roles.ROLE_GROUP3 };
 
-                                            foreach (var value in jsonResult.value)
+                                            foreach (var securityGroup in securityGroups.Intersect(availableSecurityGroups))
                                             {
-                                                identity.AddClaim(new Claim(ClaimTypes.Role, value.ToString()));
+                                                identity.AddClaim(new Claim(ClaimTypes.Role, securityGroup));
                                             }
                                         }
                                     }
